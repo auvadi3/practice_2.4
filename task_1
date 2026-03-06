@@ -1,0 +1,48 @@
+import tkinter as tk
+import requests
+from PIL import Image, ImageTk
+from io import BytesIO
+
+API_KEY = "ВАШ_API_KEY"
+
+def get_weather():
+    city = city_entry.get()
+
+    url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric"
+
+    response = requests.get(url)
+    data = response.json()
+
+    if response.status_code == 200:
+        temp = data["main"]["temp"]
+        icon = data["weather"][0]["icon"]
+
+        result_label.config(text=f"Температура: {temp} °C")
+
+        icon_url = f"http://openweathermap.org/img/wn/{icon}@2x.png"
+        img_data = requests.get(icon_url).content
+
+        img = Image.open(BytesIO(img_data))
+        img = ImageTk.PhotoImage(img)
+
+        icon_label.config(image=img)
+        icon_label.image = img
+    else:
+        result_label.config(text="Город не найден")
+
+root = tk.Tk()
+root.title("Погода")
+
+city_entry = tk.Entry(root)
+city_entry.pack()
+
+button = tk.Button(root, text="Показать погоду", command=get_weather)
+button.pack()
+
+result_label = tk.Label(root, text="")
+result_label.pack()
+
+icon_label = tk.Label(root)
+icon_label.pack()
+
+root.mainloop()
